@@ -39,12 +39,35 @@ public class SecurityConfig {
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .formLogin(formLogin -> formLogin.disable())
                 .authorizeHttpRequests(auth -> auth
+                        // PUBLIC ENDPOINTS (herkese açık)
                         .requestMatchers(
-                                "/api/auth/**",      // register - login tamamen serbest
-                                "/v3/api-docs/**",
-                                "/swagger-ui/**",
-                                "/swagger-ui.html"
+                                "/api/auth/**",           // Register & Login
+                                "/api/weather",          // Weather API
+                                "/v3/api-docs/**",       // Swagger docs
+                                "/swagger-ui/**",        // Swagger UI
+                                "/swagger-ui.html"       // Swagger UI
                         ).permitAll()
+                        
+                        // ADMIN ENDPOINTS (en spesifik olanlar önce)
+                        .requestMatchers("/api/appointments/all").hasRole("ADMIN")
+                        .requestMatchers("/api/appointments/status/**").hasRole("ADMIN")
+                        .requestMatchers("/api/appointments/*/assign").hasRole("ADMIN")
+                        .requestMatchers("/api/technicians/**").hasRole("ADMIN")
+                        .requestMatchers("/api/users/**").hasRole("ADMIN")
+                        
+                        // TECHNICIAN ENDPOINTS
+                        .requestMatchers("/api/appointments/assigned").hasRole("TECHNICIAN")
+                        .requestMatchers("/api/appointments/*/status").hasRole("TECHNICIAN")
+                        .requestMatchers("/api/service-reports/**").hasRole("TECHNICIAN")
+                        
+                        // CUSTOMER ENDPOINTS (spesifik olanlar önce)
+                        .requestMatchers("/api/appointments/my/**").hasRole("CUSTOMER")
+                        .requestMatchers("/api/appointments/my").hasRole("CUSTOMER")
+                        .requestMatchers("/api/devices/**").hasRole("CUSTOMER")
+                        .requestMatchers("/api/requests/**").hasRole("CUSTOMER")    // Service requests
+                        .requestMatchers("/api/appointments").hasRole("CUSTOMER")  // POST - randevu oluşturma (en son, genel)
+                        
+                        // Diğer tüm endpoint'ler için authentication gerekli
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
