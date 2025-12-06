@@ -56,6 +56,16 @@ public class User {
     public enum Role {
         CUSTOMER,
         TECHNICIAN,
-        ADMIN
+        ADMIN;
+
+        /**
+         * Spring Security authority formatına dönüştürür.
+         * Örnek: CUSTOMER → "ROLE_CUSTOMER"
+         * 
+         * @return "ROLE_" prefix'i ile authority string'i
+         */
+        public String getAuthority() {
+            return "ROLE_" + this.name();
+        }
     }
 }
