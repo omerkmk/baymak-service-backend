@@ -14,7 +14,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -39,16 +41,13 @@ public class SecurityConfig {
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .formLogin(formLogin -> formLogin.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // PUBLIC ENDPOINTS (herkese açık)
-                        .requestMatchers(
-                                "/api/auth/**",           // Register & Login
-                                "/api/weather",          // Weather API
-                                "/v3/api-docs/**",       // Swagger docs
-                                "/swagger-ui/**",        // Swagger UI
-                                "/swagger-ui.html"       // Swagger UI
-                        ).permitAll()
+                        // PUBLIC ENDPOINTS
+                        .requestMatchers("/error", "/error/**").permitAll()
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/weather", "/api/weather/**").permitAll()
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         
-                        // ADMIN ENDPOINTS (en spesifik olanlar önce)
+                        // ADMIN ENDPOINTS
                         .requestMatchers("/api/appointments/all").hasRole("ADMIN")
                         .requestMatchers("/api/appointments/status/**").hasRole("ADMIN")
                         .requestMatchers("/api/appointments/*/assign").hasRole("ADMIN")
@@ -60,19 +59,19 @@ public class SecurityConfig {
                         .requestMatchers("/api/appointments/*/status").hasRole("TECHNICIAN")
                         .requestMatchers("/api/service-reports/**").hasRole("TECHNICIAN")
                         
-                        // CUSTOMER ENDPOINTS (spesifik olanlar önce)
+                        // CUSTOMER ENDPOINTS
                         .requestMatchers("/api/appointments/my/**").hasRole("CUSTOMER")
-                        .requestMatchers("/api/appointments/my").hasRole("CUSTOMER")
                         .requestMatchers("/api/devices/**").hasRole("CUSTOMER")
-                        .requestMatchers("/api/requests/**").hasRole("CUSTOMER")    // Service requests
-                        .requestMatchers("/api/appointments").hasRole("CUSTOMER")  // POST - randevu oluşturma (en son, genel)
+                        .requestMatchers("/api/requests/**").hasRole("CUSTOMER")
+                        .requestMatchers("/api/appointments").hasRole("CUSTOMER")
                         
-                        // Diğer tüm endpoint'ler için authentication gerekli
+                        // DİĞER TÜM ENDPOINT'LER
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(ex -> ex.authenticationEntryPoint((request, response, authException) -> {
-                    // 401 Unauthorized döndür (403 değil)
+                    String path = request.getRequestURI();
+                    log.warn("Authentication entry point triggered for path: {}, exception: {}", path, authException.getMessage());
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     response.setContentType("application/json;charset=UTF-8");
                     response.getWriter().write("{\"message\":\"Unauthorized: Authentication required\",\"status\":401}");

@@ -5,7 +5,9 @@ import com.baymak.backend.dto.TechnicianResponseDto;
 import com.baymak.backend.exception.AlreadyExistsException;
 import com.baymak.backend.exception.NotFoundException;
 import com.baymak.backend.model.Technician;
+import com.baymak.backend.model.User;
 import com.baymak.backend.repository.TechnicianRepository;
+import com.baymak.backend.repository.UserRepository;
 import com.baymak.backend.service.TechnicianService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,6 +24,7 @@ import java.util.stream.Collectors;
 public class TechnicianServiceImpl implements TechnicianService {
 
     private final TechnicianRepository technicianRepository;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -41,12 +44,27 @@ public class TechnicianServiceImpl implements TechnicianService {
 
     @Override
     public TechnicianResponseDto createTechnician(TechnicianRequestDto dto) {
-        if (technicianRepository.existsByEmail(dto.getEmail())) {
+        // Email kontrolü (hem User hem Technician tablosunda)
+        if (userRepository.existsByEmail(dto.getEmail()) || technicianRepository.existsByEmail(dto.getEmail())) {
             throw new AlreadyExistsException("Technician with email " + dto.getEmail() + " already exists");
         }
 
+        // Password hashleme
         String hashedPassword = passwordEncoder.encode(dto.getPassword());
 
+        // User entity oluştur (role=TECHNICIAN) - Login için gerekli
+        User user = User.builder()
+                .name(dto.getName())
+                .email(dto.getEmail())
+                .phone(dto.getPhone())
+                .address("") // Technician için address opsiyonel
+                .password(hashedPassword)
+                .role(User.Role.TECHNICIAN)
+                .build();
+
+        User savedUser = userRepository.save(user);
+
+        // Technician entity oluştur
         Technician technician = Technician.builder()
                 .name(dto.getName())
                 .phone(dto.getPhone())
