@@ -14,5 +14,10 @@ public class AuthResponseDto {
     private String email;
     private String role;
     private String message;
+    // User information for profile page
+    private Long id;
+    private String name;
+    private String phone;
+    private String address;
 }
 

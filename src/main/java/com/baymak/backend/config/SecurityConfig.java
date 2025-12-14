@@ -13,8 +13,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import java.util.Arrays;
 
 @Slf4j
 @Configuration
@@ -35,8 +39,21 @@ public class SecurityConfig {
     }
 
     @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:3000"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowCredentials(true);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .formLogin(formLogin -> formLogin.disable())
@@ -44,27 +61,29 @@ public class SecurityConfig {
                         // PUBLIC ENDPOINTS
                         .requestMatchers("/error", "/error/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/weather", "/api/weather/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                        
+
+                        // Allow users to access their own profile (must be before /api/users/**)
+                        .requestMatchers("/api/users/me").authenticated()
+
                         // ADMIN ENDPOINTS
                         .requestMatchers("/api/appointments/all").hasRole("ADMIN")
                         .requestMatchers("/api/appointments/status/**").hasRole("ADMIN")
                         .requestMatchers("/api/appointments/*/assign").hasRole("ADMIN")
                         .requestMatchers("/api/technicians/**").hasRole("ADMIN")
                         .requestMatchers("/api/users/**").hasRole("ADMIN")
-                        
+
                         // TECHNICIAN ENDPOINTS
                         .requestMatchers("/api/appointments/assigned").hasRole("TECHNICIAN")
                         .requestMatchers("/api/appointments/*/status").hasRole("TECHNICIAN")
                         .requestMatchers("/api/service-reports/**").hasRole("TECHNICIAN")
-                        
+
                         // CUSTOMER ENDPOINTS
                         .requestMatchers("/api/appointments/my/**").hasRole("CUSTOMER")
                         .requestMatchers("/api/devices/**").hasRole("CUSTOMER")
                         .requestMatchers("/api/requests/**").hasRole("CUSTOMER")
                         .requestMatchers("/api/appointments").hasRole("CUSTOMER")
-                        
+
                         // DİĞER TÜM ENDPOINT'LER
                         .anyRequest().authenticated()
                 )

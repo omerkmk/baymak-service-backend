@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -54,5 +55,23 @@ public class UserController {
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/me")
+    @Operation(summary = "Kendi profilimi getir", description = "Giriş yapmış kullanıcının kendi profil bilgilerini getirir.")
+    public ResponseEntity<UserResponseDto> getMyProfile(Authentication authentication) {
+        String userEmail = authentication.getName();
+        UserResponseDto user = userService.getUserByEmail(userEmail);
+        return user != null ? ResponseEntity.ok(user) : ResponseEntity.notFound().build();
+    }
+
+    @PutMapping("/me")
+    @Operation(summary = "Kendi profilimi güncelle", description = "Giriş yapmış kullanıcının kendi profil bilgilerini günceller.")
+    public ResponseEntity<UserResponseDto> updateMyProfile(
+            Authentication authentication,
+            @Valid @RequestBody UserRequestDto userDto) {
+        String userEmail = authentication.getName();
+        UserResponseDto updated = userService.updateUserByEmail(userEmail, userDto);
+        return updated != null ? ResponseEntity.ok(updated) : ResponseEntity.notFound().build();
     }
 }

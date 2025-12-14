@@ -33,6 +33,10 @@ public class UserServiceImpl implements UserService {
     }
 
     private User mapToEntity(UserRequestDto dto) {
+        // Password is required for user creation
+        if (dto.getPassword() == null || dto.getPassword().isEmpty()) {
+            throw new IllegalArgumentException("Password is required for user creation");
+        }
         String hashedPassword = passwordEncoder.encode(dto.getPassword());
         return User.builder()
                 .name(dto.getName())
@@ -84,5 +88,30 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
+    }
+
+    @Override
+    public UserResponseDto getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .map(this::mapToDto)
+                .orElse(null);
+    }
+
+    @Override
+    public UserResponseDto updateUserByEmail(String email, UserRequestDto userDto) {
+        return userRepository.findByEmail(email)
+                .map(existing -> {
+                    existing.setName(userDto.getName());
+                    // Email değiştirilemez, mevcut email korunur
+                    existing.setPhone(userDto.getPhone());
+                    existing.setAddress(userDto.getAddress());
+                    // Password güncellenirse hashlenir
+                    if (userDto.getPassword() != null && !userDto.getPassword().isEmpty()) {
+                        existing.setPassword(passwordEncoder.encode(userDto.getPassword()));
+                    }
+                    // Role güncellenmez, mevcut role korunur
+                    return mapToDto(userRepository.save(existing));
+                })
+                .orElse(null);
     }
 }

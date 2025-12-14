@@ -20,6 +20,6 @@ public class UserRequestDto {
     @NotBlank(message = "Address cannot be empty")
     private String address;
 
-    @NotBlank(message = "Password cannot be empty")
+    // Password is optional for updates (required only for creation)
     private String password;
 }

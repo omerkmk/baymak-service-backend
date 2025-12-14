@@ -121,6 +121,10 @@ public class AuthServiceImpl implements AuthService {
                 .email(user.getEmail())
                 .role(user.getRole().name())
                 .message("Login successful")
+                .id(user.getId())
+                .name(user.getName())
+                .phone(user.getPhone())
+                .address(user.getAddress())
                 .build();
     }
 
