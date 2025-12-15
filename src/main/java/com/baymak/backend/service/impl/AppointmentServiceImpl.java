@@ -46,6 +46,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .device(device)
                 .date(dto.getDate())
                 .time(dto.getTime())
+                .problemDescription(dto.getProblemDescription())
                 .status(AppointmentStatus.PENDING)
                 .build();
 
@@ -158,6 +159,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .date(appointment.getDate())
                 .time(appointment.getTime())
                 .status(appointment.getStatus())
+                .problemDescription(appointment.getProblemDescription())
                 .createdAt(appointment.getCreatedAt())
                 .build();
     }

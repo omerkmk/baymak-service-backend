@@ -15,5 +15,7 @@ public class AppointmentRequestDto {
 
     @NotNull(message = "Time cannot be null")
     private LocalTime time;
+
+    private String problemDescription;
 }
 

@@ -2,6 +2,7 @@ package com.baymak.backend.controller;
 
 import com.baymak.backend.dto.AuthRequestDto;
 import com.baymak.backend.dto.AuthResponseDto;
+import com.baymak.backend.dto.PasswordResetRequestDto;
 import com.baymak.backend.dto.TechnicianRequestDto;
 import com.baymak.backend.dto.TechnicianResponseDto;
 import com.baymak.backend.dto.UserRequestDto;
@@ -43,6 +44,13 @@ public class AuthController {
     public ResponseEntity<AuthResponseDto> login(@Valid @RequestBody AuthRequestDto authDto) {
         AuthResponseDto response = authService.login(authDto);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/reset-password")
+    @Operation(summary = "Şifre sıfırlama", description = "Email ve yeni şifre ile şifre sıfırlama işlemi yapar.")
+    public ResponseEntity<?> resetPassword(@Valid @RequestBody PasswordResetRequestDto dto) {
+        authService.resetPassword(dto);
+        return ResponseEntity.ok().body(java.util.Map.of("message", "Password reset successfully"));
     }
 }
 

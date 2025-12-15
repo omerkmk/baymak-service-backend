@@ -58,7 +58,9 @@ public class SecurityConfig {
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .formLogin(formLogin -> formLogin.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // PUBLIC ENDPOINTS
+                        // PUBLIC ENDPOINTS - Static resources
+                        .requestMatchers("/baymak.png").permitAll()
+                        .requestMatchers("/").permitAll()
                         .requestMatchers("/error", "/error/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
@@ -72,11 +74,15 @@ public class SecurityConfig {
                         .requestMatchers("/api/appointments/*/assign").hasRole("ADMIN")
                         .requestMatchers("/api/technicians/**").hasRole("ADMIN")
                         .requestMatchers("/api/users/**").hasRole("ADMIN")
+                        .requestMatchers("/api/service-reports/all").hasRole("ADMIN")
+                        .requestMatchers("/api/service-reports/{id}").hasAnyRole("ADMIN", "TECHNICIAN")
+                        .requestMatchers("/api/service-reports/appointment/**").hasAnyRole("ADMIN", "TECHNICIAN")
 
                         // TECHNICIAN ENDPOINTS
                         .requestMatchers("/api/appointments/assigned").hasRole("TECHNICIAN")
                         .requestMatchers("/api/appointments/*/status").hasRole("TECHNICIAN")
-                        .requestMatchers("/api/service-reports/**").hasRole("TECHNICIAN")
+                        .requestMatchers("/api/service-reports/my").hasRole("TECHNICIAN")
+                        .requestMatchers("/api/service-reports").hasRole("TECHNICIAN") // POST - create report
 
                         // CUSTOMER ENDPOINTS
                         .requestMatchers("/api/appointments/my/**").hasRole("CUSTOMER")

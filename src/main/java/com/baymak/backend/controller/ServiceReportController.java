@@ -43,6 +43,13 @@ public class ServiceReportController {
         return ResponseEntity.ok(reports);
     }
 
+    @GetMapping("/all")
+    @Operation(summary = "Tüm servis raporlarını listele", description = "Admin tarafından tüm servis raporlarını listeler.")
+    public ResponseEntity<List<ServiceReportResponseDto>> getAllServiceReports() {
+        List<ServiceReportResponseDto> reports = serviceReportService.getAllServiceReports();
+        return ResponseEntity.ok(reports);
+    }
+
     @GetMapping("/appointment/{appointmentId}")
     @Operation(summary = "Randevuya ait servis raporu", description = "Belirli bir randevuya ait servis raporunu getirir.")
     public ResponseEntity<ServiceReportResponseDto> getServiceReportByAppointmentId(@PathVariable Long appointmentId) {

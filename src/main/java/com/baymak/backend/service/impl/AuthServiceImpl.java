@@ -2,6 +2,7 @@ package com.baymak.backend.service.impl;
 
 import com.baymak.backend.dto.AuthRequestDto;
 import com.baymak.backend.dto.AuthResponseDto;
+import com.baymak.backend.dto.PasswordResetRequestDto;
 import com.baymak.backend.dto.TechnicianRequestDto;
 import com.baymak.backend.dto.TechnicianResponseDto;
 import com.baymak.backend.dto.UserRequestDto;
@@ -126,6 +127,28 @@ public class AuthServiceImpl implements AuthService {
                 .phone(user.getPhone())
                 .address(user.getAddress())
                 .build();
+    }
+
+    @Override
+    public void resetPassword(PasswordResetRequestDto dto) {
+        // Email ile kullanıcıyı bul
+        User user = userRepository.findByEmail(dto.getEmail())
+                .orElseThrow(() -> new NotFoundException("User with email " + dto.getEmail() + " not found"));
+
+        // Yeni şifreyi hashle
+        String hashedPassword = passwordEncoder.encode(dto.getNewPassword());
+
+        // Şifreyi güncelle
+        user.setPassword(hashedPassword);
+        userRepository.save(user);
+
+        // Eğer Technician ise, Technician tablosundaki şifreyi de güncelle
+        if (user.getRole() == User.Role.TECHNICIAN) {
+            technicianRepository.findByEmail(dto.getEmail()).ifPresent(technician -> {
+                technician.setPassword(hashedPassword);
+                technicianRepository.save(technician);
+            });
+        }
     }
 
     private UserResponseDto mapToDto(User user) {

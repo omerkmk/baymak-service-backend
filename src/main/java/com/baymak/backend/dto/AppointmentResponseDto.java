@@ -20,6 +20,7 @@ public class AppointmentResponseDto {
     private LocalDate date;
     private LocalTime time;
     private AppointmentStatus status;
+    private String problemDescription;
     private LocalDateTime createdAt;
 }
 

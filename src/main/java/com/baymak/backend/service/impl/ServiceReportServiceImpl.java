@@ -76,6 +76,14 @@ public class ServiceReportServiceImpl implements ServiceReportService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<ServiceReportResponseDto> getAllServiceReports() {
+        return serviceReportRepository.findAll().stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public ServiceReportResponseDto getServiceReportByAppointmentId(Long appointmentId) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new NotFoundException("Appointment not found with id: " + appointmentId));

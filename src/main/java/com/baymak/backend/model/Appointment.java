@@ -41,6 +41,9 @@ public class Appointment {
     @Builder.Default
     private AppointmentStatus status = AppointmentStatus.PENDING;
 
+    @Column(name = "problem_description", columnDefinition = "TEXT")
+    private String problemDescription;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
