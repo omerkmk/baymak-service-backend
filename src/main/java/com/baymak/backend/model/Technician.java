@@ -5,6 +5,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 
 @Entity
 @Table(name = "technicians")
@@ -22,7 +23,8 @@ public class Technician {
     @Column(nullable = false)
     private String name;
 
-    @NotBlank(message = "Phone cannot be empty")
+    @NotBlank(message = "Phone number cannot be empty")
+    @Pattern(regexp = "^[0-9]{10,15}$", message = "Phone number must be 10-15 digits")
     @Column(nullable = false)
     private String phone;
 
