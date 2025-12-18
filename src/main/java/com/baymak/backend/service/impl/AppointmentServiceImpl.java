@@ -148,9 +148,14 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     private AppointmentResponseDto mapToDto(Appointment appointment) {
+        User user = appointment.getUser();
         return AppointmentResponseDto.builder()
                 .id(appointment.getId())
-                .userId(appointment.getUser().getId())
+                .userId(user.getId())
+                .customerName(user.getName())
+                .customerEmail(user.getEmail())
+                .customerPhone(user.getPhone())
+                .customerAddress(user.getAddress())
                 .deviceId(appointment.getDevice().getId())
                 .deviceType(appointment.getDevice().getDeviceType())
                 .deviceModel(appointment.getDevice().getModel())

@@ -12,6 +12,10 @@ import java.time.LocalDateTime;
 public class AppointmentResponseDto {
     private Long id;
     private Long userId;
+    private String customerName;
+    private String customerEmail;
+    private String customerPhone;
+    private String customerAddress;
     private Long deviceId;
     private String deviceType;
     private String deviceModel;
